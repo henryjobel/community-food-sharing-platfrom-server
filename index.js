@@ -3,7 +3,7 @@ const cors = require('cors');
 const app = express();
 require('dotenv').config()
 const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 
 
@@ -32,6 +32,9 @@ async function run() {
     await client.connect();
 
     const foodCollection = client.db('foodShare').collection('foods');
+    const AvailableFoodCollection = client.db('foodShare').collection('availableFoods');
+    const requestCollection = client.db('foodShare').collection('foodRequst');
+
 
 
     app.get('/foods', async(req,res) =>{
@@ -39,6 +42,44 @@ async function run() {
         const result = await cursor.toArray();
         res.send(result)
     })
+    app.get('/availableFoods', async(req,res) =>{
+        const cursor =  AvailableFoodCollection.find();
+        const result = await cursor.toArray();
+        res.send(result)
+    })
+    app.get('/availableFoods/:id', async(req,res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await AvailableFoodCollection.findOne(query)
+      res.send(result)
+    })
+
+
+    app.get('/foodrequest', async(req,res)=>{
+      const result = await requestCollection.find().toArray()
+      res.send(result)
+    })
+
+
+    app.delete('/foodrequest/:id', async(req,res)=>{
+      const id = req.params.id;
+      const query= {_id: new ObjectId(id)}
+      const result = await requestCollection.deleteOne(query)
+      res.send(result);
+    })
+
+
+    app.post('/foodrequest', async(req,res) =>{
+      const foodRequst = req.body
+      console.log(foodRequst)
+      const result = await requestCollection.insertOne(foodRequst)
+      res.send(result)
+    })
+
+    app.put('/foodrequest/:id', async(req,res) =>{
+      const updatedRequst = req.body;
+    })
+
 
 
 
