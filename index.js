@@ -37,11 +37,20 @@ async function run() {
 
 
 
+
     app.get('/foods', async(req,res) =>{
         const cursor =  foodCollection.find();
         const result = await cursor.toArray();
         res.send(result)
     })
+
+    app.post('/availableFoods', async(req,res) =>{
+      const addFood = req.body
+      console.log(addFood)
+      const result = await AvailableFoodCollection.insertOne(addFood)
+      res.send(result)
+    })
+
     app.get('/availableFoods', async(req,res) =>{
         const cursor =  AvailableFoodCollection.find();
         const result = await cursor.toArray();
@@ -57,6 +66,13 @@ async function run() {
 
     app.get('/foodrequest', async(req,res)=>{
       const result = await requestCollection.find().toArray()
+      res.send(result)
+    })
+
+    app.get('/foodrequest/:id', async(req,res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await requestCollection.findOne(query)
       res.send(result)
     })
 
@@ -76,8 +92,18 @@ async function run() {
       res.send(result)
     })
 
-    app.put('/foodrequest/:id', async(req,res) =>{
+    app.patch('/foodrequest/:id', async(req,res) =>{
+      const id = req.params.id;
+      const filter = {_id: new ObjectId(id)}
       const updatedRequst = req.body;
+      console.log(updatedRequst)
+      const updateDoc = {
+        $set: {
+          status: updatedRequst.status
+        }
+      };
+      const result = await requestCollection.updateOne(filter,updateDoc)
+      res.send(result)
     })
 
 
